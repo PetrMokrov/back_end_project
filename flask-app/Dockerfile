@@ -7,4 +7,5 @@ RUN apk update && \
   pip install -r requirements.txt && \
   apk del .build
 ADD rabbit-producer/rabbit-producer.py /work
+ADD storage-manager/storage_manager.py /work
 CMD ["python", "-u", "rabbit-producer.py"]
