@@ -1,0 +1,20 @@
+version: '2.2'
+services:
+  rabbit:
+    image: "rabbitmq"
+    ports:
+      - "5680:5672"
+  rabbit-consumer:
+    build:
+      context: rabbit-consumer
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbit
+  flask-app:
+    build:
+      context: flask-app
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbit
