@@ -2,8 +2,8 @@ version: '2.2'
 services:
   rabbit:
     image: "rabbitmq"
-    ports:
-      - "5680:5672"
+    expose:
+      - "5672"
   rabbit-consumer:
     build:
       context: rabbit-consumer
@@ -11,6 +11,7 @@ services:
     restart: always
     depends_on:
       - rabbit
+      - storage
   flask-app:
     build:
       context: flask-app
@@ -18,3 +19,12 @@ services:
     restart: always
     depends_on:
       - rabbit
+      - storage
+  storage:
+    image: postgres:11.2-alpine
+    expose:
+      - "5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=app_storage
