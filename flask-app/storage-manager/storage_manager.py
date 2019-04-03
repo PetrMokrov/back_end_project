@@ -53,7 +53,37 @@ class StorageManager:
             else:
                 break
 
-    def select(self, login):
+    def select_id(self, id):
+        while True:
+            try:
+                cursor = self.conn.cursor()
+                cursor.execute('SELECT * FROM users WHERE id = %s', (id,))
+                self.conn.commit()
+                fetch = cursor.fetchall()
+                return fetch
+            except psycopg2.Error:
+                print('Database error, reconnecting')
+                time.sleep(1)
+                self._connect()
+            else:
+                break
+
+    def select_email(self, email):
+        while True:
+            try:
+                cursor = self.conn.cursor()
+                cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+                self.conn.commit()
+                fetch = cursor.fetchall()
+                return fetch
+            except psycopg2.Error:
+                print('Database error, reconnecting')
+                time.sleep(1)
+                self._connect()
+            else:
+                break
+
+    def select_login(self, login):
         while True:
             try:
                 cursor = self.conn.cursor()
