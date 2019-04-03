@@ -7,5 +7,4 @@ RUN apk update && \
   pip install -r requirements.txt && \
   apk del .build
 ADD ./ /work
-RUN pip install -r /work/requirements.txt
-CMD ["flask", "run"]
+CMD ["flask", "run", "-h", "0.0.0.0", "-p", "5000"]

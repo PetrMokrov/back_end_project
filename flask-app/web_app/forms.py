@@ -20,7 +20,7 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Register')
 
     def validate_username(self, username):
-        user = USM.select_login(login=username.data)
+        user = USM.select(username.data, category='login')
         if user is not None:
             raise ValidationError('Please use a different username.')
 

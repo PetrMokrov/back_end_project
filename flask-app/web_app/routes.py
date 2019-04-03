@@ -27,7 +27,7 @@ def login():
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = USM.select_login(login=form.username.data)
+        user = USM.select(form.username.data, category='login')
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
