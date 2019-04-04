@@ -97,7 +97,7 @@ class StorageManager:
                 if self.select(value, category=category) is not None:
                     return False
                 cursor = self.conn.cursor()
-                cursor.execute('UPDATER users SET confirmed = TRUE WHERE %s = %%s' % category, (value,))
+                cursor.execute('UPDATE users SET confirmed = TRUE WHERE %s = %%s' % category, (value,))
                 self.conn.commit()
                 return True
             except psycopg2.Error:
