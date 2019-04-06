@@ -95,11 +95,12 @@ class StorageManager:
         while True:
             try:
                 if self.select(value, category=category) is not None:
+                    cursor = self.conn.cursor()
+                    cursor.execute('UPDATE users SET confirmed = TRUE WHERE %s = %%s' % category, (value,))
+                    self.conn.commit()
+                    return True
+                else:
                     return False
-                cursor = self.conn.cursor()
-                cursor.execute('UPDATE users SET confirmed = TRUE WHERE %s = %%s' % category, (value,))
-                self.conn.commit()
-                return True
             except psycopg2.Error:
                 print('Database error, reconnecting')
                 time.sleep(1)

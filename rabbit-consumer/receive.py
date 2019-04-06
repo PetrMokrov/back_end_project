@@ -2,6 +2,8 @@
 import pika
 import traceback, sys
 import time
+import email
+import email_sender
 
 print('Starting consumer')
 conn_params = pika.ConnectionParameters('rabbit', 5672, socket_timeout=10)
@@ -19,7 +21,8 @@ channel.queue_declare(queue='email-queue', durable=True)
 
 def callback(channel, method, properties, body):
     print('Received\t', body.decode())
-    # insert sending e-mail here
+    body_str = body.decode()
+    email_sender.send_email(body_str)
     channel.basic_ack(delivery_tag=method.delivery_tag)
 
 channel.basic_consume(callback, queue='email-queue')
