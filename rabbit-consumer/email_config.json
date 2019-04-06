@@ -2,5 +2,4 @@
   "sender_email" : "email@email.ru",
   "port_email": 465,
   "server_email": "smtp.yandex.com",
-  "password": "your_password"
-}
+  "password": "your_password"}
