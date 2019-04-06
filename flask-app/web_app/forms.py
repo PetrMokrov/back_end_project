@@ -24,7 +24,7 @@ class RegistrationForm(FlaskForm):
         if user is not None:
             raise ValidationError('Please use a different username.')
 
-    # def validate_email(self, email):
-        # user = User.query.filter_by(email=email.data).first()
-        # if user is not None:
-        #     raise ValidationError('Please use a different email address.')
+    def validate_email(self, email):
+        user = USM.select(email.data, category='email')
+        if user is not None:
+            raise ValidationError('Please use a different email address.')

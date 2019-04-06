@@ -8,19 +8,16 @@ from werkzeug.urls import url_parse
 from web_app.tokens import generate_confirmation_token, confirm_token
 from web_app import email_sender
 from web_app import login_manager
-
-def email_confirmation_required(func):
-    def decorated_view(*args, **kwargs):
-        if not current_user.is_confirmed():
-            return login_manager.unauthorized()
-        return func(*args, **kwargs)
-    return decorated_view
+import json
 
 @app.route('/')
 @app.route('/index')
 @login_required
-@email_confirmation_required
 def index():
+    if not current_user.is_confirmed():
+        flash('Uups, you have not confirmed your email.')
+        return redirect(url_for('login'))
+
     posts = [
             {
                 'author': {'username': 'John'},
@@ -35,7 +32,17 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        if current_user.is_confirmed():
+            print("authenticated, confirmed")
+            return redirect(url_for('index'))
+        if not current_user.is_confirmed():
+            token = generate_confirmation_token(current_user.email)
+            confirm_url = url_for('confirm_email', token=token, _external=True)
+            email_sender.send(json.dumps({"email": current_user.email, "token":confirm_url}))
+            flash('To complete your registration, confirm your email')
+            print("authenticated, not confirmed")
+            logout_user()
+            return redirect(url_for('login'))
     form = LoginForm()
     if form.validate_on_submit():
         user = USM.select(form.username.data, category='login')
@@ -43,15 +50,19 @@ def login():
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
-        if user.is_confirmed():
+        if user.confirmed:
+            print("authenticated, confirmed after login")
             next_page = request.args.get('next')
             if not next_page or url_parse(next_page).netloc != '':
                 next_page = url_for('index')
             return redirect(next_page)
         else:
+            print("authenticated, not confirmed after login")
             token = generate_confirmation_token(user.email)
-            email_sender.send({"email": user.email, "token":token})
+            confirm_url = url_for('confirm_email', token=token, _external=True)
+            email_sender.send(json.dumps({"email": user.email, "token":confirm_url}))
             flash('Uups, you have not confirmed your email.')
+            logout_user()
             return redirect(url_for('login'))
     return render_template('login.html', title='Sign In', form=form)
 
@@ -70,23 +81,33 @@ def register():
         user.set_password(form.password.data)
         USM.insert(user)
         token = generate_confirmation_token(user.email)
-        email_sender.send({"email": user.email, "token":token})
+        confirm_url = url_for('confirm_email', token=token, _external=True)
+        email_sender.send(json.dumps({"email": user.email, "token":confirm_url}))
         flash('To complete your registration, confirm your email')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
 @app.route('/confirm/<token>')
-@login_required
+#@login_required
 def confirm_email(token):
     try:
         email = confirm_token(token)
     except:
+        print("not confirmed")
         flash('The confirmation link is invalid or has expired.')   
-        redirect(url_for('login'))
-    
-    if current_user.confirmed:
+        return redirect(url_for('login'))
+    user = USM.select(email, category='email')
+    if user.confirmed:
+        print("already confirmed")
         flash('Account already confirmed. Please login.')
-        redirect(url_for('login'))
+        return redirect(url_for('login'))
     else:
-        USM.confirm(email, category='email')
-        redirect(url_for('login'))
+        print("confirmed")
+        flash('Account with email {} confirmed! Just login'.format(email))
+        if USM.confirm(email, category='email'):
+            test_usr = USM.select(email, category='email')
+            if not test_usr.confirmed:
+                assert( 1 == 0)
+            return redirect(url_for('login'))
+        else:
+            assert(1 == 2)
