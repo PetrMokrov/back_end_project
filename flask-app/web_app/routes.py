@@ -21,12 +21,19 @@ def index():
     posts = [
             {
                 'author': {'username': 'John'},
-                'body': 'Beautiful day in Portland!'
+                'body': 'Beautiful day in Portland!',
             },
             {
                 'author': {'username': 'Susan'},
-                'body': 'The Avengers movie was so cool!'
-            }]
+                'body': 'The Avengers movie was so cool!',
+                'image': 'http://redcapes.it/wp-content/uploads/2018/04/Avengers-Infinity-War-official-poster-1.jpg'
+            },
+            {
+                'author': {'username': 'Peter'},
+                'body': 'The raccoon is still counting our chances to pass this project!',
+                'image': 'https://media.giphy.com/media/uJi32NRF7jOA8/giphy-downsized-large.gif'
+            },
+            ]
     return render_template('index.html', login=current_user.login, title='Home', posts=posts)
 
 @app.route('/login', methods=['GET', 'POST'])

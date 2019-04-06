@@ -4,8 +4,12 @@
 
     <h1>Hi, {{ login }}!</h1>
     {% for post in posts %}
-    <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
+    <div>
+      <p>{{ post.author.username }} says: <b>{{ post.body }}</b></p>
+      {% if post.image is defined %}
+      <img src="{{ post.image }}" height="240" />
+      {% endif %}
+    </div>
     {% endfor %}
 
 {% endblock %}
-
